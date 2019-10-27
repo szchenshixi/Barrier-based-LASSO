@@ -3,8 +3,8 @@
 % though with minor adjustments as required by the assignment.
 
 % Initial settings as given in the assignment that should not be modified.
-% randn('seed',1); 
-rng(1,'v4')
+randn('seed',1); 
+% rng(1,'v4')
 global g_beta0;
 g_beta0 = zeros(10,1); 
 g_beta0(3) = 1; 
@@ -23,13 +23,13 @@ g_lambda = 0.2;
 % Line search
 global g_a;
 global g_b;
-g_a = 0.01; % Slope of the reference line
-g_b = 0.5;   % The iterative decrement coefficient
+g_a = 0.1; % Slope of the reference line
+g_b = 0.9;   % The iterative decrement coefficient
 
 % Newton's method
 global g_mu;
 global g_m0; % The coefficient associated with the logarithmic barriers.
-g_mu = 2;
-g_m0 = 2;
+g_mu = 1.1;
+g_m0 = 1; % The initial weight of the original objective function
 
 
