@@ -2,19 +2,23 @@
 % and introduces a series of logarithmic barriers to substitudes the
 % inequality constraints. m is the parameter associated with the
 % logarithmic barriers.
-function [beta, t, iter] = NewtonsMethod(beta, t, m0)
+function [beta, t, iter, gap, obj] = NewtonsMethod(beta, t, m0)
 global g_mu;
 global g_p;
+global g_epsilon;
 m = m0;
 iter = 0;
-while(dualityGap(beta) > 1e-3)
+exitCheck = inf;
+gap = [];
+obj = [];
+while(exitCheck/2 > g_epsilon)
     iter = iter + 1;
-    step = stepComput(beta, t, m);
+    [step, exitCheck] = stepComput(beta, t, m);
     beta = beta + step(1:g_p);
     t = t + step(g_p+1:end);
-    m = g_mu * m;
-    gap = dualityGap(beta);
-    obj = objective(beta);
+    m = m * g_mu;
+    gap = [gap dualityGap(beta)];
+    obj = [obj objective(beta)];
 end
 end
 
@@ -32,30 +36,36 @@ end
 
 function Hessian = hessianComput(beta, t, m)
 global g_X;
-D1 = diag(2*(t.^2 + beta.^2)./(t.^2-beta.^2).^2);
-D2 = diag(-4*t.*beta./(t.^2-beta.^2).^2);
+D1_num = 2*(t.^2 + beta.^2);
+D1_deno = (t.^2-beta.^2).^2;
+D1 = diag(D1_num./D1_deno);
+D2_num = -4*t.*beta;
+D2_deno = (t.^2-beta.^2).^2;
+D2 = diag(D2_num./D2_deno);
 Hessian = [2*m*(g_X')*g_X + D1 D2;
            D2 D1];
 end
 
-function step = stepComput(beta, t, m)
+function [step, exitCheck] = stepComput(beta, t, m)
 global g_a;
 global g_b;
 global g_p;
 gradient = gradientComput(beta, t, m);
 Hessian = hessianComput(beta, t, m);
-direction = -(Hessian^-1)*gradient;
-step = direction;   % Initial step is equal to the direction vector
-while(objective(beta + step(1:g_p)) > objective(beta) + g_a*gradient(1:g_p)'*step(1:g_p))
+direction = -inv(Hessian)*gradient;
+step = 2 * direction;   % Initial step constructed from the direction vector
+exitCheck = (1/m^3) * (gradient') * inv(Hessian) * gradient;   % The square of Newton decrement
+% counter = 0;
+while(augmentedObjective(beta + step(1 : g_p),                      ...
+                         t + step(g_p+1 : 2*g_p),                   ...
+                         m) > augmentedObjective(beta, t, m) +      ...
+                         g_a*(gradient')*step                       ...
+                         || min(t + step(g_p+1 : 2*g_p)) < 0        ...
+     )
     step = g_b * step;
+%     counter = counter + 1;
+%     if(counter > 1e2)
+%         break;
+%     end
 end
-end
-
-function f0 = objective(beta)
-global g_X;   % nxp
-global g_y;   % nx1
-global g_lambda;  %scalar
-firstTerm = (g_y-g_X*beta)' * (g_y-g_X*beta);
-secondTerm = g_lambda * ones(size(beta))' * abs(beta);
-f0 = firstTerm + secondTerm;
 end

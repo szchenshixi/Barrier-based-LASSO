@@ -23,13 +23,14 @@ g_lambda = 0.2;
 % Line search
 global g_a;
 global g_b;
-g_a = 0.1; % Slope of the reference line
-g_b = 0.9;   % The iterative decrement coefficient
+g_a = 0.001; % Slope of the reference line
+g_b = 0.5;   % The iterative decrement coefficient
 
 % Newton's method
 global g_mu;
 global g_m0; % The coefficient associated with the logarithmic barriers.
-g_mu = 1.1;
+global g_epsilon;
+g_mu = 1.1;     % This variable determines how sudden you "flatten" the logarithmic barrier.
 g_m0 = 1; % The initial weight of the original objective function
-
+g_epsilon = 1e-17;
 
