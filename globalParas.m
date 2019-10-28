@@ -30,7 +30,7 @@ g_b = 0.5;   % The iterative decrement coefficient
 global g_mu;
 global g_m0; % The coefficient associated with the logarithmic barriers.
 global g_epsilon;
-g_mu = 1.1;     % This variable determines how sudden you "flatten" the logarithmic barrier.
+g_mu = 1.2;     % This variable determines how sudden you "flatten" the logarithmic barrier.
 g_m0 = 1; % The initial weight of the original objective function
 g_epsilon = 1e-17;
 
